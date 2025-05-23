@@ -7,14 +7,14 @@ from dateutil.relativedelta import relativedelta
 class ProductLabelLayout(models.TransientModel):
     _inherit = "product.label.layout"
 
-    label_type = fields.Selection(
+    print_format = fields.Selection(
         selection_add=[
             ("eti_corta", "ETI-CORTA"),
             ("eti_media", "ETI-MEDIA"),
             ("eti_larga", "ETI-LARGA"),
             ("eti_caja", "ETI-CAJA"),
         ],
-        string="Tipo de Etiqueta",
+        string="Formato",
     )
     lot_name = fields.Char(
         string="Número de Lote", compute="_compute_lot_info", store=True
@@ -155,7 +155,7 @@ class ProductLabelLayout(models.TransientModel):
         return zpl
 
     def _prepare_report_data(self):
-        if self.label_type:
+        if self.print_format in ["eti_corta", "eti_media", "eti_larga", "eti_caja"]:
             if self.custom_quantity <= 0:
                 raise UserError(_("You need to set a positive quantity."))
 
@@ -178,16 +178,14 @@ class ProductLabelLayout(models.TransientModel):
                 )
 
             # Generar ZPL según el tipo de etiqueta
-            if self.label_type == "eti_corta":
+            if self.print_format == "eti_corta":
                 zpl_data = self._generate_zpl_eti_corta(production)
-            elif self.label_type == "eti_media":
+            elif self.print_format == "eti_media":
                 zpl_data = self._generate_zpl_eti_media(production)
-            elif self.label_type == "eti_larga":
+            elif self.print_format == "eti_larga":
                 zpl_data = self._generate_zpl_eti_larga(production)
-            elif self.label_type == "eti_caja":
+            elif self.print_format == "eti_caja":
                 zpl_data = self._generate_zpl_eti_caja(production)
-            else:
-                raise UserError(_("Tipo de etiqueta no soportado: %s", self.label_type))
 
             # Crear un archivo temporal para el ZPL y devolver una acción para descargarlo
             import base64
@@ -195,7 +193,7 @@ class ProductLabelLayout(models.TransientModel):
             zpl_file = base64.b64encode(zpl_data.encode("utf-8"))
             attachment = self.env["ir.attachment"].create(
                 {
-                    "name": f"etiqueta_{self.label_type}.zpl",
+                    "name": f"etiqueta_{self.print_format}.zpl",
                     "datas": zpl_file,
                     "type": "binary",
                 }
