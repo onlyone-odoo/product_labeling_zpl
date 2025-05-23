@@ -15,6 +15,12 @@ class ProductLabelLayout(models.TransientModel):
             ("eti_caja", "ETI-CAJA"),
         ],
         string="Formato",
+        ondelete={
+            "eti_corta": "set default",
+            "eti_media": "set default",
+            "eti_larga": "set default",
+            "eti_caja": "set default",
+        },
     )
     lot_name = fields.Char(
         string="Número de Lote", compute="_compute_lot_info", store=True
@@ -65,7 +71,7 @@ class ProductLabelLayout(models.TransientModel):
     def _generate_zpl_eti_corta(self, production):
         zpl = ""
         # 104mm x 61mm, 1mm ≈ 8 dots, 104mm = 832 dots, 61mm = 488 dots
-        for _ in range(int(production.product_qty)):
+        for _ in range(int(self.custom_quantity)):
             zpl += """
             ^XA^CI28
             ^PW832^LH0,0
@@ -88,7 +94,7 @@ class ProductLabelLayout(models.TransientModel):
     def _generate_zpl_eti_media(self, production):
         zpl = ""
         # 109mm x 149mm, 109mm = 872 dots, 149mm = 1192 dots
-        for _ in range(int(production.product_qty)):
+        for _ in range(int(self.custom_quantity)):
             zpl += """
             ^XA^CI28
             ^PW872^LH0,0
@@ -111,7 +117,7 @@ class ProductLabelLayout(models.TransientModel):
     def _generate_zpl_eti_larga(self, production):
         zpl = ""
         # 66mm x 251mm, 66mm = 528 dots, 251mm = 2008 dots
-        for _ in range(int(production.product_qty)):
+        for _ in range(int(self.custom_quantity)):
             zpl += """
             ^XA^CI28
             ^PW528^LH0,0
@@ -134,7 +140,7 @@ class ProductLabelLayout(models.TransientModel):
     def _generate_zpl_eti_caja(self, production):
         zpl = ""
         # 109mm x 149mm, 109mm = 872 dots, 149mm = 1192 dots
-        for _ in range(int(production.product_qty)):
+        for _ in range(int(self.custom_quantity)):
             zpl += """
             ^XA^CI28
             ^PW872^LH0,0
