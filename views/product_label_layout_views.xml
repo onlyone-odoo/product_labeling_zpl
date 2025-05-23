@@ -1,16 +1,13 @@
-<!-- product_labeling/views/product_label_layout_views.xml -->
 <odoo>
     <record id="view_product_label_layout_form_inherit" model="ir.ui.view">
         <field name="name">product.label.layout.form.inherit</field>
         <field name="model">product.label.layout</field>
-        <field name="inherit_id" ref="product.product_label_layout_form"/>
+        <field name="inherit_id" ref="product.view_product_label_layout_form"/>
         <field name="arch" type="xml">
-            <field name="print_format" position="after">
-                <field name="label_type" attrs="{'invisible': [('print_format', '!=', False)]}"/>
-                <field name="lot_name" readonly="1"/>
-                <field name="manufacturing_date" readonly="1"/>
-                <field name="expiration_date" readonly="1"/>
-                <field name="quantity" readonly="1"/>
+            <field name="product_id" position="after">
+                <field name="label_type"/>
+                <field name="batch_id" domain="[('product_id', '=', product_id)]" invisible="[('product_id', '=', False)]"/>
+                <field name="quantity"/>
             </field>
         </field>
     </record>
