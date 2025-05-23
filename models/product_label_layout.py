@@ -16,7 +16,6 @@ class ProductLabelLayout(models.TransientModel):
         ],
         string="Tipo de Etiqueta",
     )
-
     lot_name = fields.Char(
         string="Número de Lote", compute="_compute_lot_info", store=True
     )
@@ -27,7 +26,7 @@ class ProductLabelLayout(models.TransientModel):
         string="Fecha de Vencimiento", compute="_compute_lot_info", store=True
     )
 
-    @api.depends("production.lot_producing_id")
+    @api.depends("custom_quantity")
     def _compute_lot_info(self):
         for wizard in self:
             if (
@@ -61,6 +60,7 @@ class ProductLabelLayout(models.TransientModel):
             )
             self.product_ids = [(6, 0, [production.product_id.id])]
             self.custom_quantity = production.product_qty
+            self.move_quantity = "custom"
 
     def _generate_zpl_eti_corta(self, production):
         zpl = ""
@@ -156,7 +156,7 @@ class ProductLabelLayout(models.TransientModel):
 
     def _prepare_report_data(self):
         if self.label_type:
-            if self.quantity <= 0:
+            if self.custom_quantity <= 0:
                 raise UserError(_("You need to set a positive quantity."))
 
             if (
