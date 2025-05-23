@@ -17,7 +17,4 @@
         "bin": [],
     },
     "depends": ["base", "product", "stock", "mrp"],
-    "data": [
-        "views/product_label_layout_views.xml",
-    ],
 }
