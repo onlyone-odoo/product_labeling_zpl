@@ -8,7 +8,7 @@ class ProductLabelLayout(models.TransientModel):
     _inherit = "product.label.layout"
 
     label_type = fields.Selection(
-        [
+        selection_add=[
             ("eti_corta", "ETI-CORTA"),
             ("eti_media", "ETI-MEDIA"),
             ("eti_larga", "ETI-LARGA"),
@@ -16,9 +16,7 @@ class ProductLabelLayout(models.TransientModel):
         ],
         string="Tipo de Etiqueta",
     )
-    quantity = fields.Integer(
-        string="Cantidad de Productos", compute="_compute_quantity", store=True
-    )
+
     lot_name = fields.Char(
         string="Número de Lote", compute="_compute_lot_info", store=True
     )
@@ -29,21 +27,7 @@ class ProductLabelLayout(models.TransientModel):
         string="Fecha de Vencimiento", compute="_compute_lot_info", store=True
     )
 
-    @api.depends("custom_quantity")
-    def _compute_quantity(self):
-        for wizard in self:
-            if (
-                "active_model" in self._context
-                and self._context["active_model"] == "mrp.production"
-            ):
-                production = self.env["mrp.production"].browse(
-                    self._context.get("active_id")
-                )
-                wizard.quantity = production.product_qty
-            else:
-                wizard.quantity = wizard.custom_quantity
-
-    @api.depends("custom_quantity")
+    @api.depends("production.lot_producing_id")
     def _compute_lot_info(self):
         for wizard in self:
             if (
@@ -77,7 +61,6 @@ class ProductLabelLayout(models.TransientModel):
             )
             self.product_ids = [(6, 0, [production.product_id.id])]
             self.custom_quantity = production.product_qty
-            self.move_quantity = "custom"
 
     def _generate_zpl_eti_corta(self, production):
         zpl = ""
