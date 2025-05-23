@@ -1,6 +1,7 @@
 # product_labeling/models/product_label_layout.py
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from dateutil.relativedelta import relativedelta
 
 
 class ProductLabelLayout(models.TransientModel):
@@ -28,7 +29,7 @@ class ProductLabelLayout(models.TransientModel):
         string="Fecha de Vencimiento", compute="_compute_lot_info", store=True
     )
 
-    @api.depends("move_line_ids", "custom_quantity")
+    @api.depends("custom_quantity")
     def _compute_quantity(self):
         for wizard in self:
             if (
@@ -42,7 +43,7 @@ class ProductLabelLayout(models.TransientModel):
             else:
                 wizard.quantity = wizard.custom_quantity
 
-    @api.depends("move_line_ids")
+    @api.depends("custom_quantity")
     def _compute_lot_info(self):
         for wizard in self:
             if (
@@ -58,9 +59,8 @@ class ProductLabelLayout(models.TransientModel):
                     else ""
                 )
                 wizard.manufacturing_date = production.date_start or fields.Date.today()
-                # Calcular la fecha de vencimiento (por ejemplo, 3 años después de la fabricación)
                 wizard.expiration_date = (
-                    wizard.manufacturing_date + relativedelta(years=3)
+                    wizard.manufacturing_date + relativedelta(years=2)
                     if wizard.manufacturing_date
                     else False
                 )
@@ -69,8 +69,8 @@ class ProductLabelLayout(models.TransientModel):
                 wizard.manufacturing_date = False
                 wizard.expiration_date = False
 
-    @api.onchange("move_line_ids", "product_ids")
-    def _onchange_move_line_ids(self):
+    @api.onchange("product_ids")
+    def _onchange_product_ids(self):
         if self._context.get("active_model") == "mrp.production":
             production = self.env["mrp.production"].browse(
                 self._context.get("active_id")
@@ -125,8 +125,6 @@ class ProductLabelLayout(models.TransientModel):
             )
         return zpl
 
-    # Métodos similares para _generate_zpl_eti_larga y _generate_zpl_eti_caja
-
     def _generate_zpl_eti_larga(self, production):
         zpl = ""
         # 66mm x 251mm, 66mm = 528 dots, 251mm = 2008 dots
@@ -174,10 +172,6 @@ class ProductLabelLayout(models.TransientModel):
         return zpl
 
     def _prepare_report_data(self):
-        from dateutil.relativedelta import (
-            relativedelta,
-        )  # Importar dentro del método para evitar problemas de carga
-
         if self.label_type:
             if self.quantity <= 0:
                 raise UserError(_("You need to set a positive quantity."))
