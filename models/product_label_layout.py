@@ -214,3 +214,21 @@ class ProductLabelLayout(models.TransientModel):
 
         # Flujo original para otros formatos
         return super(ProductLabelLayout, self)._prepare_report_data()
+
+    def process(self):
+        self.ensure_one()
+        result = self._prepare_report_data()
+        # Si _prepare_report_data devuelve una acción (para formatos personalizados), retornarla directamente
+        if isinstance(result, dict) and result.get("type") == "ir.actions.act_url":
+            return result
+        # Flujo original para otros formatos
+        xml_id, data = result
+        if not xml_id:
+            raise UserError(
+                _("Unable to find report template for %s format", self.print_format)
+            )
+        report_action = self.env.ref(xml_id).report_action(
+            None, data=data, config=False
+        )
+        report_action.update({"close_on_report_download": True})
+        return report_action
