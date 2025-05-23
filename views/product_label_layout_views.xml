@@ -1,4 +1,4 @@
-<!-- product_labeling_zpl/views/product_label_layout_views.xml -->
+<!-- product_labeling/views/product_label_layout_views.xml -->
 <odoo>
     <record id="view_product_label_layout_form_inherit" model="ir.ui.view">
         <field name="name">product.label.layout.form.inherit</field>
