@@ -3,7 +3,7 @@
     <record id="view_product_label_layout_form_inherit" model="ir.ui.view">
         <field name="name">product.label.layout.form.inherit</field>
         <field name="model">product.label.layout</field>
-        <field name="inherit_id" ref="product.view_product_label_layout_form"/>
+        <field name="inherit_id" ref="product.product_label_layout_form"/>
         <field name="arch" type="xml">
             <field name="print_format" position="after">
                 <field name="label_type" attrs="{'invisible': [('print_format', '!=', False)]}"/>
